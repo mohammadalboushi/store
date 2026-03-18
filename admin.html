@@ -44,13 +44,14 @@
             display: flex; justify-content: space-between; align-items: center; gap: 10px;
         }
         .header-buttons-container {
-            display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; justify-content: flex-end; flex-grow: 1;
+            display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; width: 100%; max-width: calc(100vw - 140px); justify-content: flex-start;
         }
         .header-buttons-container::-webkit-scrollbar { display: none; }
         
         .header-btn {
             background: rgba(255,255,255,0.1); color: white; border: 1px solid var(--border);
-            padding: 8px 12px; border-radius: 12px; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 5px;
+            height: 32px; padding: 0 10px; border-radius: 10px; font-size: 0.8rem; 
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
             transition: 0.2s; white-space: nowrap; flex-shrink: 0;
         }
         .header-btn.active { background: var(--primary); border-color: var(--primary); }
@@ -167,7 +168,7 @@
 <body>
 
     <header>
-        <div style="font-weight:900; font-size:1.2rem; white-space: nowrap;">Admin<span style="color:#3b82f6">Panel</span></div>
+        <div style="font-weight:900; font-size:0.9rem; white-space: nowrap;">Admin<span style="color:#3b82f6">Panel</span></div>
         <div class="header-buttons-container">
             <button onclick="openSettingsModal()" class="header-btn" style="background: rgba(255,255,255,0.05); position: relative;">
                 <i class="fas fa-cog"></i> 
@@ -369,7 +370,6 @@
         let catToDelete = null;
         let swapSourceKey = null;
         
-        let appSortable = null;
         let catSortable = null;
         let linksSortable = null;
         let newProfileImg = "";
@@ -493,14 +493,17 @@
             select.innerHTML = selectHTML;
         };
 
-        window.setFilter = (f) => { currentFilter = f; renderTabs(); renderApps(); };
+        window.setFilter = (f) => { 
+            currentFilter = f; 
+            swapSourceKey = null; 
+            renderTabs(); 
+            renderApps(); 
+        };
 
         function renderApps() {
             const container = document.getElementById('appsContainer');
             container.innerHTML = '';
             
-            if (appSortable) { appSortable.destroy(); appSortable = null; }
-
             const sortedApps = Object.entries(allApps).sort(([,a], [,b]) => (a.order || 0) - (b.order || 0));
 
             sortedApps.forEach(([k, v]) => {
@@ -522,7 +525,7 @@
                     card.innerHTML = `
                         <div class="check-circle"></div>
                         ${!isSelectMode ? '<span class="edit-badge">✏️ تعديل</span>' : ''}
-                        ${!isSelectMode && currentFilter === 'ALL' ? \`<div class="drag-handle swap-btn" onclick="handleSwapClick(event, '\${k}')" style="cursor:pointer;"><i class="fas fa-exchange-alt"></i></div>\` : ''}
+                        ${!isSelectMode && currentFilter === 'ALL' ? `<div class="drag-handle swap-btn" onclick="handleSwapClick(event, '${k}')" style="cursor:pointer;"><i class="fas fa-exchange-alt"></i></div>` : ''}
                         <img src="${v.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'">
                         <div class="card-title">${v.name}</div>
                         <div style="font-size:0.7rem; color:#94a3b8;">${v.type}</div>
@@ -851,6 +854,7 @@
         };
         window.openEditModal = (key, data) => {
             const modal = document.getElementById('appModal'); modal.style.display = 'flex';
+            document.getElementById('fileInput').value = ''; 
             if(key) { editKey = key; currentImg = data.img; document.getElementById('appCat').value = data.type; document.getElementById('appName').value = data.name; document.getElementById('appLink').value = data.link; document.getElementById('appHidden').checked = data.isHidden; document.getElementById('previewImg').src = data.img; document.getElementById('previewImg').style.display='block'; document.getElementById('delBtn').style.display='block'; document.getElementById('saveBtn').innerText='حفظ التعديلات'; }
             else { editKey = null; currentImg=""; document.getElementById('appName').value=""; document.getElementById('appLink').value=""; document.getElementById('previewImg').style.display='none'; document.getElementById('delBtn').style.display='none'; document.getElementById('saveBtn').innerText='نشر'; }
         };
