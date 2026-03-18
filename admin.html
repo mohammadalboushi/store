@@ -396,7 +396,16 @@
                 if(document.getElementById('logoutBtn')) document.getElementById('logoutBtn').style.display = 'none';
             }
         });
-        window.login = () => signInWithPopup(auth, provider);
+        window.login = () => {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    console.log("تم تسجيل الدخول بنجاح");
+                })
+                .catch((error) => {
+                    console.error("خطأ في تسجيل الدخول:", error.message);
+                    alert("حدث خطأ أثناء تسجيل الدخول: " + error.message);
+                });
+        };
         
         window.logout = () => {
             signOut(auth).then(() => location.reload());
