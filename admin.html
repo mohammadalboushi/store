@@ -41,12 +41,17 @@
         header {
             position: sticky; top: 0; z-index: 1000; background: rgba(15, 23, 42, 0.98);
             border-bottom: 1px solid var(--border); padding: 15px 20px;
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex; justify-content: space-between; align-items: center; gap: 10px;
         }
+        .header-buttons-container {
+            display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; justify-content: flex-end; flex-grow: 1;
+        }
+        .header-buttons-container::-webkit-scrollbar { display: none; }
+        
         .header-btn {
             background: rgba(255,255,255,0.1); color: white; border: 1px solid var(--border);
             padding: 8px 12px; border-radius: 12px; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 5px;
-            transition: 0.2s;
+            transition: 0.2s; white-space: nowrap; flex-shrink: 0;
         }
         .header-btn.active { background: var(--primary); border-color: var(--primary); }
 
@@ -162,10 +167,11 @@
 <body>
 
     <header>
-        <div style="font-weight:900; font-size:1.2rem;">Admin<span style="color:#3b82f6">Panel</span></div>
-        <div style="display:flex; gap:8px;">
-            <button onclick="openSettingsModal()" class="header-btn" style="background: rgba(255,255,255,0.05);">
+        <div style="font-weight:900; font-size:1.2rem; white-space: nowrap;">Admin<span style="color:#3b82f6">Panel</span></div>
+        <div class="header-buttons-container">
+            <button onclick="openSettingsModal()" class="header-btn" style="background: rgba(255,255,255,0.05); position: relative;">
                 <i class="fas fa-cog"></i> 
+                <span id="authDot" style="position:absolute; top:-2px; right:-2px; width:12px; height:12px; border-radius:50%; background:#ef4444; border:2px solid #0f172a; transition: 0.3s;"></span>
             </button>
             <button onclick="toggleSelectMode()" id="selectBtn" class="header-btn">
                 <i class="fas fa-check-square"></i> تحديد
@@ -361,6 +367,7 @@
         let isSelectMode = false;
         let selectedApps = new Set();
         let catToDelete = null;
+        let swapSourceKey = null;
         
         let appSortable = null;
         let catSortable = null;
@@ -387,16 +394,20 @@
         };
 
                         onAuthStateChanged(auth, (user) => {
+            const dot = document.getElementById('authDot');
             if (user) {
                 if (user.uid === 'EFrGJwUdnlZDQ4A7GGIEh2VgoyK2') {
+                    if(dot) dot.style.background = '#10b981';
                     document.getElementById('loginBtn').style.display = 'none';
                     if(document.getElementById('logoutBtn')) document.getElementById('logoutBtn').style.display = 'flex';
                     initSystem();
                 } else {
+                    if(dot) dot.style.background = '#ef4444';
                     alert("عذراً، هذا الحساب غير مصرح له بالدخول كمدير.\nالمعرف الحالي: " + user.uid);
                     auth.signOut().then(() => location.reload());
                 }
             } else {
+                if(dot) dot.style.background = '#ef4444';
                 document.getElementById('loginBtn').style.display = 'flex';
                 if(document.getElementById('logoutBtn')) document.getElementById('logoutBtn').style.display = 'none';
             }
@@ -503,7 +514,7 @@
                     card.setAttribute('data-key', k);
                     
                     card.onclick = (e) => {
-                        if(e.target.classList.contains('drag-handle') || e.target.parentElement.classList.contains('drag-handle')) return;
+                        if(e.target.closest('.swap-btn')) return;
                         if(isSelectMode) toggleSelection(k);
                         else openEditModal(k, v);
                     };
@@ -511,7 +522,7 @@
                     card.innerHTML = `
                         <div class="check-circle"></div>
                         ${!isSelectMode ? '<span class="edit-badge">✏️ تعديل</span>' : ''}
-                        ${!isSelectMode && currentFilter === 'ALL' ? '<div class="drag-handle"><i class="fas fa-bars"></i></div>' : ''}
+                        ${!isSelectMode && currentFilter === 'ALL' ? \`<div class="drag-handle swap-btn" onclick="handleSwapClick(event, '\${k}')" style="cursor:pointer;"><i class="fas fa-exchange-alt"></i></div>\` : ''}
                         <img src="${v.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'">
                         <div class="card-title">${v.name}</div>
                         <div style="font-size:0.7rem; color:#94a3b8;">${v.type}</div>
@@ -519,22 +530,41 @@
                     container.appendChild(card);
                 }
             });
-
-            if (currentFilter === 'ALL' && !isSelectMode) {
-                // تفعيل السحب فقط عند الضغط على المقبض .drag-handle
-                appSortable = new Sortable(container, {
-                    handle: '.drag-handle', animation: 150, 
-                    forceFallback: true, fallbackOnBody: true,
-                    ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
-                    onEnd: () => {
-                        const items = container.querySelectorAll('.card');
-                        const updates = {};
-                        items.forEach((item, index) => updates[`apps/${item.getAttribute('data-key')}/order`] = index);
-                        update(ref(db), updates);
-                    }
-                });
-            }
         }
+
+        window.handleSwapClick = (e, key) => {
+            e.stopPropagation();
+            if (!swapSourceKey) {
+                swapSourceKey = key;
+                const card = document.querySelector(`.card[data-key="${key}"]`);
+                card.style.border = '2px dashed #f59e0b';
+                card.style.transform = 'scale(1.05)';
+                showAlert("وضع التبديل", "تم تحديد التطبيق. انقر على تطبيق آخر للتبديل معه.", "🔄");
+            } else {
+                if (swapSourceKey === key) {
+                    swapSourceKey = null;
+                    renderApps();
+                    return;
+                }
+                const order1 = allApps[swapSourceKey].order || 0;
+                const order2 = allApps[key].order || 0;
+
+                const updates = {};
+                updates[`apps/${swapSourceKey}/order`] = order2;
+                updates[`apps/${key}/order`] = order1;
+
+                update(ref(db), updates)
+                    .then(() => {
+                        swapSourceKey = null;
+                        showAlert("نجاح", "تم تبديل الأماكن بنجاح", "✅");
+                    })
+                    .catch(err => {
+                        swapSourceKey = null;
+                        showAlert("خطأ سيرفر", "ممنوع الحفظ! راجع الصلاحيات: " + err.message, "❌");
+                        renderApps();
+                    });
+            }
+        };
 
         window.toggleSelectMode = () => {
             isSelectMode = !isSelectMode;
@@ -828,10 +858,24 @@
             const name = document.getElementById('appName').value; const link = document.getElementById('appLink').value; const type = document.getElementById('appCat').value; const isHidden = document.getElementById('appHidden').checked;
             if(!name) return showAlert("خطأ", "اسم التطبيق مطلوب", "❌");
             const data = { name, link, type, isHidden, img: currentImg || "https://cdn-icons-png.flaticon.com/512/564/564619.png", order: editKey ? allApps[editKey].order : 0 };
-            if(editKey) update(ref(db, 'apps/'+editKey), data); else push(ref(db, 'apps'), data);
-            closeModal('appModal');
+            
+            const req = editKey ? update(ref(db, 'apps/'+editKey), data) : push(ref(db, 'apps'), data);
+            
+            req.then(() => {
+                closeModal('appModal');
+                showAlert("تم", "تم الحفظ بنجاح", "✅");
+            }).catch(err => {
+                showAlert("مشكلة بالحفظ", "خطأ بالسيرفر: " + err.message, "❌");
+            });
         };
-        window.deleteSingleApp = () => { remove(ref(db, 'apps/'+editKey)); closeModal('appModal'); };
+        
+        window.deleteSingleApp = () => { 
+            remove(ref(db, 'apps/'+editKey)).then(() => {
+                closeModal('appModal'); 
+            }).catch(err => {
+                showAlert("خطأ", "لم يتم الحذف: " + err.message, "❌");
+            });
+        };
 
         window.deleteAllData = () => {
             if(confirm("هل أنت متأكد من حذف جميع البيانات؟ هذا الإجراء سيمسح كل شيء ولا يمكن التراجع عنه!")) {
