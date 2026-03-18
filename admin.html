@@ -386,16 +386,22 @@
             links: []
         };
 
-        onAuthStateChanged(auth, (user) => {
-            if (user && user.uid === myUID) {
-                document.getElementById('loginBtn').style.display = 'none';
-                if(document.getElementById('logoutBtn')) document.getElementById('logoutBtn').style.display = 'flex';
-                initSystem();
+                onAuthStateChanged(auth, (user) => {
+            if (user) {
+                if (user.uid === '3sEGxmdxD6frH9TVxxXyswPArxC3') {
+                    document.getElementById('loginBtn').style.display = 'none';
+                    if(document.getElementById('logoutBtn')) document.getElementById('logoutBtn').style.display = 'flex';
+                    initSystem();
+                } else {
+                    alert("عذراً، هذا الحساب غير مصرح له بالدخول كمدير.\nالمعرف الحالي: " + user.uid);
+                    auth.signOut().then(() => location.reload());
+                }
             } else {
                 document.getElementById('loginBtn').style.display = 'flex';
                 if(document.getElementById('logoutBtn')) document.getElementById('logoutBtn').style.display = 'none';
             }
         });
+
         window.login = () => {
             signInWithPopup(auth, provider)
                 .then((result) => {
@@ -408,7 +414,13 @@
         };
         
         window.logout = () => {
-            signOut(auth).then(() => location.reload());
+            import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js").then((authLib) => {
+                authLib.signOut(auth).then(() => {
+                    location.reload();
+                }).catch((error) => {
+                    alert("خطأ أثناء تسجيل الخروج: " + error.message);
+                });
+            });
         };
 
         function initSystem() {
