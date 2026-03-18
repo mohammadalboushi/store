@@ -2,11 +2,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyC_iEb4UhUREVJ2mfj00BounPVaeGQr7wI",
-            authDomain: "mohammadalboushi-e9231.firebaseapp.com",
-            projectId: "mohammadalboushi-e9231",
-            databaseURL: "https://mohammadalboushi-e9231-default-rtdb.firebaseio.com/",
-            appId: "1:236925802081:web:2e26094ab5ecdf988f3c20"
+            apiKey: "AIzaSyBB_U4C880PW4GxZd8FALv8yBSiP2mNeBY",
+            authDomain: "malaboushi.firebaseapp.com",
+            projectId: "malaboushi",
+            storageBucket: "malaboushi.firebasestorage.app",
+            messagingSenderId: "110336819350",
+            appId: "1:110336819350:web:2b1b0488e72b811f0602b7",
+            measurementId: "G-94ZT4TQYZY",
+            databaseURL: "https://malaboushi-default-rtdb.firebaseio.com/"
         };
 
         const app = initializeApp(firebaseConfig);
