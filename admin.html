@@ -340,6 +340,17 @@
         </div>
     </div>
 
+    <div id="deleteAllModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-title" style="color:#ef4444">⚠️ تحذير خطير</div>
+            <div class="modal-desc">هل أنت متأكد من حذف جميع البيانات؟ هذا الإجراء سيمسح كل شيء ولا يمكن التراجع عنه!</div>
+            <div class="modal-btns">
+                <button onclick="confirmDeleteAll()" class="btn-full btn-danger">نعم، احذف كل شيء</button>
+                <button onclick="closeModal('deleteAllModal')" class="btn-full btn-cancel">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
     <div id="appModal" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-title">بيانات التطبيق</div>
@@ -600,7 +611,6 @@
                 const card = document.querySelector(`.card[data-key="${key}"]`);
                 card.style.border = '2px dashed #f59e0b';
                 card.style.transform = 'scale(1.05)';
-                showAlert("وضع التبديل", "تم تحديد التطبيق. انقر على تطبيق آخر للتبديل معه.", "🔄");
             } else {
                 if (swapSourceKey === key) {
                     swapSourceKey = null;
@@ -617,7 +627,7 @@
                 update(ref(db), updates)
                     .then(() => {
                         swapSourceKey = null;
-                        showAlert("نجاح", "تم تبديل الأماكن بنجاح", "✅");
+                        renderApps();
                     })
                     .catch(err => {
                         swapSourceKey = null;
@@ -627,7 +637,7 @@
             }
         };
 
-        window.toggleSelectMode = () => {
+        window.toggleSelectMode = (fromHistory = false) => {
             isSelectMode = !isSelectMode;
             selectedApps.clear();
             const btn = document.getElementById('selectBtn');
@@ -638,10 +648,14 @@
                 btn.classList.add('active');
                 bulkBar.classList.add('visible');
                 addBtn.style.display = 'none';
+                if (!fromHistory) history.pushState({ action: 'selectMode' }, "");
             } else {
                 btn.classList.remove('active');
                 bulkBar.classList.remove('visible');
                 addBtn.style.display = 'flex';
+                if (!fromHistory && history.state && history.state.action === 'selectMode') {
+                    history.back();
+                }
             }
             renderApps();
         };
@@ -940,12 +954,15 @@
         };
 
         window.deleteAllData = () => {
-            if(confirm("هل أنت متأكد من حذف جميع البيانات؟ هذا الإجراء سيمسح كل شيء ولا يمكن التراجع عنه!")) {
-                remove(ref(db)).then(() => {
-                    showAlert("تم الحذف", "تم تصفير قاعدة البيانات بالكامل", "🗑️");
-                    setTimeout(() => location.reload(), 2000);
-                });
-            }
+            document.getElementById('deleteAllModal').style.display = 'flex';
+        };
+
+        window.confirmDeleteAll = () => {
+            remove(ref(db)).then(() => {
+                closeModal('deleteAllModal');
+                showAlert("تم الحذف", "تم تصفير قاعدة البيانات بالكامل", "🗑️");
+                setTimeout(() => location.reload(), 2000);
+            });
         };
         
         window.processImage = () => { 
@@ -1004,6 +1021,12 @@
         // التفاعل مع ضغطة زر الرجوع الفعلي بالجوال
         window.addEventListener('popstate', (e) => {
             document.querySelectorAll('.modal-overlay').forEach(el => el.style.display = 'none');
+            
+            // الخروج من وضع التحديد إذا تم الضغط على زر الرجوع
+            if (isSelectMode && (!e.state || e.state.action !== 'selectMode')) {
+                toggleSelectMode(true);
+            }
+
             if (e.state && e.state.modal) {
                 document.getElementById(e.state.modal).style.display = 'flex';
             }
