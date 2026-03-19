@@ -118,6 +118,23 @@
         #delCatModal, #alertModal { z-index: 4000 !important; }
 
         .modal-box { background: #1e293b; padding: 25px; border-radius: 20px; width: 90%; max-width: 380px; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; max-height: 85vh; overflow-y: auto;}
+        
+        /* تنسيقات القائمة السفلية */
+        #settingsModal { align-items: flex-end; }
+        .bottom-sheet { background: #1e293b; border-radius: 25px 25px 0 0; width: 100%; padding: 20px 20px 30px; box-sizing: border-box; animation: slideUp 0.3s ease-out; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); max-height: 90vh; overflow-y: auto; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .bs-drag { width: 40px; height: 5px; background: #475569; border-radius: 5px; margin: 0 auto 20px; }
+        .bs-header { display: flex; align-items: center; justify-content: flex-end; gap: 15px; margin-bottom: 25px; }
+        .bs-header-info { text-align: right; }
+        .bs-header-name { font-weight: 900; font-size: 1.1rem; color: #f8fafc; }
+        .bs-header-email { color: #94a3b8; font-size: 0.8rem; }
+        .bs-header img { width: 55px; height: 55px; border-radius: 50%; border: 2px solid #3b82f6; object-fit: cover; }
+        .bs-item { display: flex; align-items: center; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #334155; cursor: pointer; }
+        .bs-item:last-of-type { border-bottom: none; }
+        .bs-item-right { display: flex; align-items: center; gap: 15px; }
+        .bs-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .bs-item-title { font-weight: 700; font-size: 1rem; color: #f8fafc; }
+        .bs-arrow { color: #475569; font-size: 1rem; }
         .modal-title { font-size: 1.2rem; color: white; margin-bottom: 10px; font-weight: bold; }
         .modal-desc { color: #94a3b8; font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5; }
         .modal-btns { display: flex; flex-direction: column; gap: 10px; }
@@ -219,63 +236,94 @@
     </div>
 
     <div id="settingsModal" class="modal-overlay">
-        <div class="modal-box" style="max-width: 450px;">
-            <div class="modal-title" style="margin-bottom:20px;">⚙️ الإعدادات</div>
+        <div class="bottom-sheet">
+            <div class="bs-drag"></div>
             
             <div id="settingsMain">
-                <div class="settings-menu-btn" onclick="openSettingsSection('catLock')">
-                    <span><i class="fas fa-lock-open" style="margin-left:10px; color:#3b82f6;"></i> قفل/فتح الأقسام</span>
-                    <i class="fas fa-chevron-left"></i>
+                <div class="bs-header">
+                    <div class="bs-header-info">
+                        <div class="bs-header-name" id="menuUserName">Mohammad Al Boushi</div>
+                        <div class="bs-header-email" id="menuUserEmail"></div>
+                    </div>
+                    <img id="menuUserImg" src="https://midomido.neocities.org/mohammadalboushi.png">
                 </div>
-                <div class="settings-menu-btn" onclick="openSettingsSection('sidebarEdit')">
-                    <span><i class="fas fa-user-edit" style="margin-left:10px; color:#10b981;"></i> تعديل لوحة الخيارات</span>
-                    <i class="fas fa-chevron-left"></i>
+
+                <div class="bs-item" onclick="logout()">
+                    <i class="fas fa-chevron-left bs-arrow"></i>
+                    <div class="bs-item-right">
+                        <span class="bs-item-title">تسجيل الخروج من الحساب</span>
+                        <div class="bs-icon" style="background: rgba(255,255,255,0.05); color: #f8fafc;"><img src="https://midomido.neocities.org/mohammadalboushi.png" id="logoutMenuImg" style="width:40px; height:40px; border-radius:50%;"></div>
+                    </div>
                 </div>
-                
-                <div style="border-top: 1px solid rgba(255,255,255,0.08); margin: 15px 0; padding-top: 15px;"></div>
-                
-                <div class="settings-menu-btn" onclick="exportData()" style="background: rgba(16, 185, 129, 0.1); border-color: #10b981;">
-                    <span><i class="fas fa-file-export" style="margin-left:10px; color:#10b981;"></i> تصدير البيانات (نسخة احتياطية)</span>
+
+                <div class="bs-item" onclick="exportData()">
+                    <i class="fas fa-chevron-left bs-arrow"></i>
+                    <div class="bs-item-right">
+                        <span class="bs-item-title">تصدير نسخة</span>
+                        <div class="bs-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;"><i class="fas fa-download"></i></div>
+                    </div>
                 </div>
-                <div class="settings-menu-btn" onclick="document.getElementById('importDataInput').click()" style="background: rgba(239, 68, 68, 0.1); border-color: #ef4444;">
-                    <span><i class="fas fa-file-import" style="margin-left:10px; color:#ef4444;"></i> استيراد البيانات (استعادة)</span>
+
+                <div class="bs-item" onclick="document.getElementById('importDataInput').click()">
+                    <i class="fas fa-chevron-left bs-arrow"></i>
+                    <div class="bs-item-right">
+                        <span class="bs-item-title">استيراد نسخة</span>
+                        <div class="bs-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;"><i class="fas fa-upload"></i></div>
+                    </div>
                 </div>
                 <input type="file" id="importDataInput" hidden accept=".json" onchange="importData(event)">
 
-                <div style="border-top: 1px solid rgba(255,255,255,0.08); margin: 15px 0; padding-top: 15px;"></div>
-
-                <div class="settings-menu-btn" onclick="deleteAllData()" style="background: #ef4444; border-color: #ef4444; color: white;">
-                    <span><i class="fas fa-trash-alt" style="margin-left:10px;"></i> حذف جميع البيانات (تصفير)</span>
+                <div class="bs-item" onclick="openSettingsSection('catLock')">
+                    <i class="fas fa-chevron-left bs-arrow"></i>
+                    <div class="bs-item-right">
+                        <span class="bs-item-title">قفل/فتح الأقسام</span>
+                        <div class="bs-icon" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;"><i class="fas fa-lock-open"></i></div>
+                    </div>
                 </div>
 
-                <button onclick="closeModal('settingsModal')" class="btn-full btn-cancel" style="margin-top:20px;">إغلاق</button>
+                <div class="bs-item" onclick="openSettingsSection('sidebarEdit')">
+                    <i class="fas fa-chevron-left bs-arrow"></i>
+                    <div class="bs-item-right">
+                        <span class="bs-item-title">تعديل اللوحة الجانبية</span>
+                        <div class="bs-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;"><i class="fas fa-user-edit"></i></div>
+                    </div>
+                </div>
+
+                <div class="bs-item" onclick="deleteAllData()">
+                    <i class="fas fa-chevron-left bs-arrow"></i>
+                    <div class="bs-item-right">
+                        <span class="bs-item-title" style="color: #ef4444;">حذف البيانات</span>
+                        <div class="bs-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;"><i class="fas fa-trash-alt"></i></div>
+                    </div>
+                </div>
+
+                <button onclick="closeModal('settingsModal')" class="btn-full btn-cancel" style="margin-top:15px; background: #f8fafc; color: #0f172a; font-weight: 900; border: none; padding: 15px; border-radius: 12px;">إغلاق</button>
             </div>
 
             <div id="catLockSection" class="settings-section">
-                <div style="margin-bottom:15px; color:#94a3b8; font-size:0.85rem;">اضغط للقفل/الفتح (سيتم الحفظ تلقائياً)</div>
+                <div style="margin-bottom:15px; color:#94a3b8; font-size:0.85rem; text-align:center;">اضغط للقفل/الفتح (سيتم الحفظ تلقائياً)</div>
                 <div id="catLockList" style="max-height:300px; overflow-y:auto;"></div>
-                <button onclick="backToSettingsMain()" class="btn-full btn-cancel" style="margin-top:15px;">رجوع</button>
+                <button onclick="backToSettingsMain()" class="btn-full btn-cancel" style="margin-top:15px; background: #f8fafc; color: #0f172a; font-weight: 900; border: none;">رجوع</button>
             </div>
 
             <div id="sidebarEditSection" class="settings-section">
                 <div style="border-bottom:1px solid #334155; padding-bottom:15px; margin-bottom:15px;">
-                    <div style="font-weight:bold; margin-bottom:10px; color:white;">الصورة الشخصية والوصف</div>
-                    <img id="profilePreview" src="" style="width:80px; height:80px; border-radius:50%; border:2px solid #3b82f6; object-fit:cover; margin-bottom:10px;">
+                    <div style="font-weight:bold; margin-bottom:10px; color:white; text-align:right;">الصورة الشخصية والوصف</div>
+                    <img id="profilePreview" src="" style="width:80px; height:80px; border-radius:50%; border:2px solid #3b82f6; object-fit:cover; margin-bottom:10px; display:block; margin-left:auto;">
                     <button onclick="document.getElementById('profileImgInput').click()" class="btn-full btn-cancel" style="font-size:0.8rem;">تغيير الصورة</button>
                     <input type="file" id="profileImgInput" hidden accept="image/*" onchange="processProfileImage()">
                     
                     <div style="margin-top:10px; text-align:right;">
-                        <label style="color:#94a3b8; font-size:0.8rem;">عبارة الوصف (البايو):</label>
                         <input type="text" id="profileBioInput" placeholder="اكتب عبارة تظهر تحت الاسم..." style="width:100%; margin-top:5px; background:#0f172a; border:1px solid #334155;">
                     </div>
                 </div>
                 
-                <div style="font-weight:bold; margin-bottom:10px; color:white;">روابط التواصل</div>
+                <div style="font-weight:bold; margin-bottom:10px; color:white; text-align:right;">روابط التواصل</div>
                 <div id="linksList" style="max-height:200px; overflow-y:auto; margin-bottom:10px;"></div>
                 
                 <button onclick="addNewLink()" class="btn-full" style="background:#334155; border:1px dashed #94a3b8; margin-bottom:10px;">+ إضافة رابط جديد</button>
                 <button onclick="saveSidebarSettings()" id="saveSidebarBtn" class="btn-full btn-confirm">حفظ التغييرات</button>
-                <button onclick="backToSettingsMain()" class="btn-full btn-cancel">رجوع</button>
+                <button onclick="backToSettingsMain()" class="btn-full btn-cancel" style="margin-top:10px;">رجوع</button>
             </div>
         </div>
     </div>
@@ -393,13 +441,23 @@
             links: []
         };
 
-                        onAuthStateChanged(auth, (user) => {
+                                onAuthStateChanged(auth, (user) => {
             const dot = document.getElementById('authDot');
             if (user) {
                 if (user.uid === 'EFrGJwUdnlZDQ4A7GGIEh2VgoyK2') {
                     if(dot) dot.style.background = '#10b981';
                     document.getElementById('loginBtn').style.display = 'none';
                     if(document.getElementById('logoutBtn')) document.getElementById('logoutBtn').style.display = 'flex';
+                    
+                    const menuName = document.getElementById('menuUserName');
+                    const menuEmail = document.getElementById('menuUserEmail');
+                    const menuImg = document.getElementById('menuUserImg');
+                    const logoutImg = document.getElementById('logoutMenuImg');
+                    
+                    if(menuName) menuName.innerText = user.displayName || "Mohammad Al Boushi";
+                    if(menuEmail) menuEmail.innerText = user.email || "";
+                    if(menuImg && user.photoURL) { menuImg.src = user.photoURL; logoutImg.src = user.photoURL; }
+
                     initSystem();
                 } else {
                     if(dot) dot.style.background = '#ef4444';
@@ -918,7 +976,38 @@
             }
         };
         window.openCatModal = () => document.getElementById('catModal').style.display='flex';
-        window.closeModal = (id) => document.getElementById(id).style.display='none';
+        
+        window.closeModal = (id) => {
+            document.getElementById(id).style.display = 'none';
+            if (history.state && history.state.modal === id) { history.back(); }
+        };
+
+        // إغلاق النوافذ عند الضغط بالخارج (في المكان الفاضي)
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) window.closeModal(this.id);
+            });
+        });
+
+        // مراقبة النوافذ لإضافة زر الرجوع التلقائي بالجوال
+        const modalObserver = new MutationObserver((mutations) => {
+            mutations.forEach((m) => {
+                if (m.attributeName === 'style' && m.target.style.display === 'flex') {
+                    if (!history.state || history.state.modal !== m.target.id) {
+                        history.pushState({ modal: m.target.id }, "");
+                    }
+                }
+            });
+        });
+        document.querySelectorAll('.modal-overlay').forEach(el => modalObserver.observe(el, { attributes: true }));
+
+        // التفاعل مع ضغطة زر الرجوع الفعلي بالجوال
+        window.addEventListener('popstate', (e) => {
+            document.querySelectorAll('.modal-overlay').forEach(el => el.style.display = 'none');
+            if (e.state && e.state.modal) {
+                document.getElementById(e.state.modal).style.display = 'flex';
+            }
+        });
 
         window.exportData = () => {
             const dataToExport = {
