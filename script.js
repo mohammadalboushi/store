@@ -22,7 +22,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
         // 1. جلب الأقسام
         onValue(ref(db, 'categories'), (snapshot) => {
             const val = snapshot.val();
-            if(val) { allCats = val; renderTabs(); renderApps(); } 
+            if(val) { 
+                allCats = val; 
+            } else {
+                allCats = {};
+            }
+            renderTabs(); 
+            renderApps(); 
         });
 
         // 2. جلب إعدادات السايدبار (الصورة، البايو، والروابط)
@@ -92,8 +98,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
                 allAppsData = Object.values(data)
                     .filter(app => !app.isHidden)
                     .sort((a, b) => (a.order || 0) - (b.order || 0));
-                renderApps();
+            } else {
+                allAppsData = [];
             }
+            renderApps();
         });
 
         window.filterApps = (cat, btn) => {
